@@ -9,7 +9,7 @@ class SimplestDilemma:
     compare assigns points of reward or punishment according to the moves of both players.
     main_loop runs the simulation, the moves of the players are randomly chosen,
     there is 1/4 chances that one of the four possibles outcomes.
-    create_log sums up the game that has been played
+    create_log sums up the game that has been played.
     """
     def __init__(self, both_cooperate_outcome, both_betray_outcome, betrayal_reward, betrayal_punishment, initial_points):
         # possible outcomes
@@ -22,9 +22,12 @@ class SimplestDilemma:
         self.player_A_points = initial_points
         self.player_B_points = initial_points
 
-        # delcaring record of betrayals and coops
+        # declaring record of betrayals and coops
         self.player_A_record = []
         self.player_B_record = []
+
+        self.betrayal_count_A = 0
+        self.betrayal_count_B = 0
 
         self.game_state_count = [0, 0, 0, 0]
         self.rounds = 0
@@ -53,7 +56,6 @@ class SimplestDilemma:
             self.player_A_points += self.both_betray_outcome
             self.player_B_points += self.both_betray_outcome
 
-
     def main_loop(self, when_to_end):
         while self.player_A_points >= 0 and self.player_B_points >= 0 and self.rounds <= when_to_end:
             probability = random.random()
@@ -77,7 +79,6 @@ class SimplestDilemma:
                 self.betray(self.player_B_record)
                 self.game_state_count[3] += 1
 
-
             self.compare(self.rounds, self.player_A_record, self.player_B_record)
             """
             print('round: ', round + 1)
@@ -87,18 +88,36 @@ class SimplestDilemma:
             """
             self.rounds += 1
 
+        self.betrayal_count_A = sum(self.player_A_record)
+        self.betrayal_count_B = sum(self.player_B_record)
+
     def create_log(self):
-        beatrayal_count_A = sum(self.player_A_record)
-        beatrayal_count_B = sum(self.player_B_record)
         both_cooperate, A_betrays, B_betrays, both_betray = self.game_state_count
         print('number of states occurred; \n both_cooperate, A_betrays, B_betrays, both_betray:', *self.game_state_count)
-        print('number of A betrayal: ', beatrayal_count_A)
-        print('number of B betrayal: ', beatrayal_count_B)
+        print('number of A betrayal: ', self.betrayal_count_A)
+        print('number of B betrayal: ', self.betrayal_count_B)
         print('final points for A: ', self.player_A_points)
         print('final points for B: ', self.player_B_points)
-        print('number of rounds: ', self.rounds)
+        print('number of rounds: ', self.rounds - 1)
 
 
-my_dilemma = SimplestDilemma(1, -1, 3, -3, 10)
-my_dilemma.main_loop(100)
-my_dilemma.create_log()
+# do you want to check out how one game looks like?
+check_it = False
+if check_it:
+    my_dilemma = SimplestDilemma(1, -1, 3, -3, 50)
+    my_dilemma.main_loop(1000)
+    my_dilemma.create_log()
+
+# do you want to see if betraying more times than your opponent gives you an edge?
+let_me_see = True
+if let_me_see:
+    betrayal_wins_count = 0
+    i = 0
+    for i in range(100000):
+        my_dilemma = SimplestDilemma(1, -1, 3, -3, 50)
+        my_dilemma.main_loop(1000)
+        if my_dilemma.betrayal_count_A > my_dilemma.betrayal_count_B and my_dilemma.player_A_points > my_dilemma.player_B_points or\
+            my_dilemma.betrayal_count_A < my_dilemma.betrayal_count_B and my_dilemma.player_A_points < my_dilemma.player_B_points:
+            betrayal_wins_count += 1
+        i += 1
+    print("betrayal wins ", betrayal_wins_count, " times out of ", i)
